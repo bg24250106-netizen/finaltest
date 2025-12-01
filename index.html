@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>14일 수험 집중 일정표</title>
+    <style>
+        :root {
+            --color-primary: #2158b0;
+            --color-success: #27ae60;
+            --color-warning: #f39c12;
+            --color-danger: #e74c3c;
+            --color-bg: #f8f9fa;
+            --color-surface: #ffffff;
+            --color-border: #e1e8ed;
+            --color-text: #2c3e50;
+            --color-text-light: #7f8c8d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .progress-summary {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .progress-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .progress-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .progress-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .section {
+            background: var(--color-surface);
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .day-card {
+            background: var(--color-bg);
+            border: 2px solid var(--color-border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .day-card:hover {
+            border-color: var(--color-primary);
+            box-shadow: 0 4px 12px rgba(33, 88, 176, 0.1);
+        }
+
+        .day-card.completed {
+            background: #f0f9ff;
+            border-color: var(--color-success);
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .day-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .day-progress {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .progress-bar {
+            width: 150px;
+            height: 6px;
+            background: var(--color-border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-primary);
+            min-width: 45px;
+        }
+
+        .tasks-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+        }
+
+        .task {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: white;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .task:hover {
+            background: var(--color-bg);
+            border-color: var(--color-primary);
+        }
+
+        .task.completed {
+            background: #f0f9ff;
+            border-color: var(--color-success);
+        }
+
+        .task.completed .task-text {
+            text-decoration: line-through;
+            color: var(--color-text-light);
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--color-border);
+            border-radius: 4px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .task.completed .checkbox {
+            background: var(--color-success);
+            border-color: var(--color-success);
+            color: white;
+            font-size: 12px;
+        }
+
+        .task-text {
+            font-size: 14px;
+            flex: 1;
+            line-height: 1.4;
+        }
+
+        .completion-message {
+            display: none;
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 20px;
+            animation: slideIn 0.5s ease;
+        }
+
+        .completion-message.show {
+            display: block;
+        }
+
+        .completion-message .emoji {
+            font-size: 32px;
+            margin-right: 10px;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .reset-btn {
+            background: var(--color-danger);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .period-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: var(--color-bg);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--color-primary);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--color-text-light);
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--color-primary);
+        }
+
+        @media (max-width: 768px) {
+            .header-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .progress-summary {
+                width: 100%;
+            }
+
+            .section {
+                padding: 15px;
+            }
+
+            .tasks-list {
+                grid-template-columns: 1fr;
+            }
+
+            .day-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .day-progress {
+                width: 100%;
+            }
+
+            .progress-bar {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 14일 수험 집중 일정표</h1>
+            <div class="header-info">
+                <div>
+                    <p style="font-size: 14px; margin-bottom: 5px;">D-14 일정 시작</p>
+                    <p style="font-size: 12px; opacity: 0.9;">12월 1일 ~ 12월 14일</p>
+                </div>
+                <div class="progress-summary">
+                    <div class="progress-item">
+                        <div class="progress-label">전체 진행률</div>
+                        <div class="progress-value" id="totalProgress">0%</div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-label">완료한 일과</div>
+                        <div class="progress-value"><span id="completedCount">0</span> / <span id="totalCount">0</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1-5일: 기초 -->
+        <div class="section">
+            <div class="section-title">📚 1-5일 (기초 다지기)</div>
+            <div id="period1"></div>
+            <div class="period-stats">
+                <div class="stat-box">
+                    <div class="stat-label">국어</div>
+                    <div class="stat-value" id="stat-korean-1">0%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">영어</div>
+                    <div class="stat-value" id="stat-english-1">0%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">수학</div>
+                    <div class="stat-value" id="stat-math-1">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6-10일: 마무리 -->
+        <div class="section">
+            <div class="section-title">🚀 6-10일 (마무리 정리)</div>
+            <div id="period2"></div>
+            <div class="period-stats">
+                <div class="stat-box">
+                    <div class="stat-label">국어</div>
+                    <div class="stat-value" id="stat-korean-2">0%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">영어</div>
+                    <div class="stat-value" id="stat-english-2">0%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">수학</div>
+                    <div class="stat-value" id="stat-math-2">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 11-14일: 기출 -->
+        <div class="section">
+            <div class="section-title">🔥 11-14일 (기출 폭발)</div>
+            <div id="period3"></div>
+            <div class="period-stats">
+                <div class="stat-box">
+                    <div class="stat-label">국어</div>
+                    <div class="stat-value" id="stat-korean-3">0%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">영어</div>
+                    <div class="stat-value" id="stat-english-3">0%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">수학</div>
+                    <div class="stat-value" id="stat-math-3">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="reset-btn" onclick="resetAll()">⟲ 초기화</button>
+        </div>
+    </div>
+
+    <script>
+        const schedule = {
+            1: {
+                date: '12/1',
+                day: '월',
+                tasks: [
+                    { subject: '국어', content: '자습서 20%' },
+                    { subject: '영어', content: '단어 40개' },
+                    { subject: '영어', content: '3·4단원 교재 30p' },
+                    { subject: '수학', content: '기본 문제집 20p' },
+                    { subject: '사회', content: '교과서 20%' }
+                ]
+            },
+            2: {
+                date: '12/2',
+                day: '화',
+                tasks: [
+                    { subject: '국어', content: '자습서 20%' },
+                    { subject: '영어', content: '3·4단원 교재 30p' },
+                    { subject: '영어', content: '단어 40개' },
+                    { subject: '수학', content: '기본 문제집 20p' },
+                    { subject: '과학', content: '교과서 20%' }
+                ]
+            },
+            3: {
+                date: '12/3',
+                day: '수',
+                tasks: [
+                    { subject: '국어', content: '백발백중 20p' },
+                    { subject: '영어', content: '24년 모고 30p' },
+                    { subject: '영어', content: '단어 40개' },
+                    { subject: '수학', content: '기본 문제집 30p' },
+                    { subject: '역사', content: '교과서 20%' }
+                ]
+            },
+            4: {
+                date: '12/4',
+                day: '목',
+                tasks: [
+                    { subject: '국어', content: '자습서 20%' },
+                    { subject: '영어', content: '3·4단원 교재 40p' },
+                    { subject: '영어', content: '단어 20개' },
+                    { subject: '수학', content: '심화 문제집 25p' },
+                    { subject: '사회', content: '문제집 25p' }
+                ]
+            },
+            5: {
+                date: '12/5',
+                day: '금',
+                tasks: [
+                    { subject: '국어', content: '백발백중 20p' },
+                    { subject: '영어', content: '24년 모고 40p' },
+                    { subject: '영어', content: '단어 20개' },
+                    { subject: '수학', content: '심화 문제집 25p' },
+                    { subject: '과학', content: '문제집 30p' }
+                ]
+            },
+            6: {
+                date: '12/6',
+                day: '토',
+                tasks: [
+                    { subject: '국어', content: '자습서 마지막 20% (완료)' },
+                    { subject: '영어', content: '25년 모고 40p' },
+                    { subject: '수학', content: '기본 문제집 완료' },
+                    { subject: '역사', content: '프린트 1회' },
+                    { subject: '사회', content: '프린트 1회' },
+                    { subject: '과학', content: '프린트 1회' }
+                ]
+            },
+            7: {
+                date: '12/7',
+                day: '일',
+                tasks: [
+                    { subject: '국어', content: '백발백중 20p' },
+                    { subject: '영어', content: '24·25년 모고 합쳐서 60p' },
+                    { subject: '영어', content: '단어 총 60개' },
+                    { subject: '수학', content: '심화 문제집 40p' },
+                    { subject: '사회', content: '프린트 1회 + 교과서 25%' },
+                    { subject: '과학', content: '프린트 1회 + 교과서 25%' },
+                    { subject: '역사', content: '프린트 1회 + 교과서 25%' }
+                ]
+            },
+            8: {
+                date: '12/8',
+                day: '월',
+                tasks: [
+                    { subject: '국어', content: '백발백중 20p' },
+                    { subject: '영어', content: '3·4단원 남은 40p' },
+                    { subject: '영어', content: '단어 총 정리' },
+                    { subject: '수학', content: '심화 문제집 25p' },
+                    { subject: '사회', content: '교과서 나머지 (완료)' }
+                ]
+            },
+            9: {
+                date: '12/9',
+                day: '화',
+                tasks: [
+                    { subject: '국어', content: '백발백중 20p' },
+                    { subject: '영어', content: '24년 모고 남은 40p (완료)' },
+                    { subject: '수학', content: '심화 문제집 30p' },
+                    { subject: '과학', content: '교과서 나머지 (완료)' }
+                ]
+            },
+            10: {
+                date: '12/10',
+                day: '수',
+                tasks: [
+                    { subject: '국어', content: '백발백중 완료' },
+                    { subject: '영어', content: '25년 모고 20p (완료)' },
+                    { subject: '수학', content: '심화 완료' },
+                    { subject: '역사', content: '교과서 완료' },
+                    { subject: '사회', content: '프린트 2회' },
+                    { subject: '과학', content: '프린트 2회' },
+                    { subject: '역사', content: '프린트 2회' }
+                ]
+            },
+            11: {
+                date: '12/11',
+                day: '목',
+                tasks: [
+                    { subject: '국어', content: '기출 8묶음' },
+                    { subject: '수학', content: '기출 6묶음' },
+                    { subject: '영어', content: '기출 2묶음' },
+                    { subject: '사회', content: '프린트 1회' },
+                    { subject: '과학', content: '프린트 1회' },
+                    { subject: '역사', content: '프린트 1회' }
+                ]
+            },
+            12: {
+                date: '12/12',
+                day: '금',
+                tasks: [
+                    { subject: '국어', content: '기출 8묶음' },
+                    { subject: '수학', content: '기출 6묶음' },
+                    { subject: '영어', content: '기출 2묶음' },
+                    { subject: '사회', content: '오답 정리' },
+                    { subject: '과학', content: '오답 정리' },
+                    { subject: '역사', content: '오답 정리' }
+                ]
+            },
+            13: {
+                date: '12/13',
+                day: '토',
+                tasks: [
+                    { subject: '국어', content: '기출 8묶음' },
+                    { subject: '수학', content: '기출 6묶음' },
+                    { subject: '영어', content: '기출 3묶음' },
+                    { subject: '사회', content: '모든 오답 1회' },
+                    { subject: '과학', content: '모든 오답 1회' },
+                    { subject: '역사', content: '모든 오답 1회' }
+                ]
+            },
+            14: {
+                date: '12/14',
+                day: '일',
+                tasks: [
+                    { subject: '국어', content: '기출 8묶음 (40묶음 완료)' },
+                    { subject: '수학', content: '기출 6묶음 (30묶음 완료)' },
+                    { subject: '영어', content: '기출 3묶음 (10묶음 완료)' },
+                    { subject: '사회', content: '개념 정리' },
+                    { subject: '과학', content: '개념 정리' },
+                    { subject: '역사', content: '개념 정리' }
+                ]
+            }
+        };
+
+        const state = {};
+
+        function initializeState() {
+            Object.keys(schedule).forEach(day => {
+                schedule[day].tasks.forEach((task, idx) => {
+                    const key = `day-${day}-task-${idx}`;
+                    state[key] = localStorage.getItem(key) === 'true';
+                });
+            });
+        }
+
+        function renderSchedule() {
+            const period1El = document.getElementById('period1');
+            const period2El = document.getElementById('period2');
+            const period3El = document.getElementById('period3');
+
+            [period1El, period2El, period3El].forEach(el => el.innerHTML = '');
+
+            [1, 2, 3, 4, 5].forEach(day => renderDay(day, period1El));
+            [6, 7, 8, 9, 10].forEach(day => renderDay(day, period2El));
+            [11, 12, 13, 14].forEach(day => renderDay(day, period3El));
+
+            updateProgress();
+        }
+
+        function renderDay(day, container) {
+            const dayData = schedule[day];
+            const dayCard = document.createElement('div');
+            dayCard.className = 'day-card';
+            dayCard.id = `day-${day}`;
+
+            const tasksCompleted = dayData.tasks.filter((_, idx) => state[`day-${day}-task-${idx}`]).length;
+            const isCompleted = tasksCompleted === dayData.tasks.length;
+            if (isCompleted) dayCard.classList.add('completed');
+
+            const header = document.createElement('div');
+            header.className = 'day-header';
+            header.innerHTML = `
+                <div class="day-title">${dayData.date} (${dayData.day})</div>
+                <div class="day-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${isCompleted ? 100 : (tasksCompleted / dayData.tasks.length * 100)}%"></div>
+                    </div>
+                    <div class="progress-text">${tasksCompleted}/${dayData.tasks.length}</div>
+                </div>
+            `;
+            dayCard.appendChild(header);
+
+            const tasksList = document.createElement('div');
+            tasksList.className = 'tasks-list';
+
+            dayData.tasks.forEach((task, idx) => {
+                const key = `day-${day}-task-${idx}`;
+                const isChecked = state[key];
+
+                const taskEl = document.createElement('div');
+                taskEl.className = 'task' + (isChecked ? ' completed' : '');
+                taskEl.onclick = () => toggleTask(key, day);
+
+                taskEl.innerHTML = `
+                    <div class="checkbox">${isChecked ? '✓' : ''}</div>
+                    <div class="task-text"><strong>${task.subject}</strong> - ${task.content}</div>
+                `;
+                tasksList.appendChild(taskEl);
+            });
+
+            dayCard.appendChild(tasksList);
+            container.appendChild(dayCard);
+        }
+
+        function toggleTask(key, day) {
+            state[key] = !state[key];
+            localStorage.setItem(key, state[key]);
+            renderSchedule();
+        }
+
+        function updateProgress() {
+            let totalTasks = 0;
+            let completedTasks = 0;
+
+            Object.keys(schedule).forEach(day => {
+                schedule[day].tasks.forEach((_, idx) => {
+                    totalTasks++;
+                    if (state[`day-${day}-task-${idx}`]) completedTasks++;
+                });
+            });
+
+            const percent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+            document.getElementById('totalProgress').textContent = percent + '%';
+            document.getElementById('completedCount').textContent = completedTasks;
+            document.getElementById('totalCount').textContent = totalTasks;
+
+            // 과목별 진행률
+            updateSubjectStats();
+
+            // 완료 메시지
+            if (percent === 100) {
+                const msg = document.querySelector('.completion-message') || createCompletionMessage();
+                msg.classList.add('show');
+            }
+        }
+
+        function updateSubjectStats() {
+            const subjects = ['국어', '영어', '수학'];
+            const periods = [
+                { key: 1, days: [1, 2, 3, 4, 5] },
+                { key: 2, days: [6, 7, 8, 9, 10] },
+                { key: 3, days: [11, 12, 13, 14] }
+            ];
+
+            periods.forEach(period => {
+                subjects.forEach(subject => {
+                    let total = 0, completed = 0;
+                    period.days.forEach(day => {
+                        schedule[day].tasks.forEach((task, idx) => {
+                            if (task.subject === subject) {
+                                total++;
+                                if (state[`day-${day}-task-${idx}`]) completed++;
+                            }
+                        });
+                    });
+                    const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+                    const statEl = document.getElementById(`stat-${getSubjectId(subject)}-${period.key}`);
+                    if (statEl) statEl.textContent = percent + '%';
+                });
+            });
+        }
+
+        function getSubjectId(subject) {
+            const map = { '국어': 'korean', '영어': 'english', '수학': 'math' };
+            return map[subject];
+        }
+
+        function createCompletionMessage() {
+            const msg = document.createElement('div');
+            msg.className = 'completion-message';
+            msg.innerHTML = '<span class="emoji">✅</span> 축하합니다! 14일 일정을 모두 완료했습니다!';
+            document.querySelector('.section:last-of-type').after(msg);
+            return msg;
+        }
+
+        function resetAll() {
+            if (confirm('정말 초기화하시겠습니까? 모든 체크가 삭제됩니다.')) {
+                Object.keys(state).forEach(key => {
+                    state[key] = false;
+                    localStorage.removeItem(key);
+                });
+                document.querySelectorAll('.completion-message').forEach(el => el.classList.remove('show'));
+                renderSchedule();
+            }
+        }
+
+        // 초기화
+        initializeState();
+        renderSchedule();
+    </script>
+</body>
+</html>
