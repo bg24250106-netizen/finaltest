@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>기말고사 학습 플래너</title>
+    <style>
+        :root {
+            --color-primary: #2158b0;
+            --color-success: #27ae60;
+            --color-warning: #f39c12;
+            --color-danger: #e74c3c;
+            --color-bg: #f8f9fa;
+            --color-surface: #ffffff;
+            --color-border: #e1e8ed;
+            --color-text: #2c3e50;
+            --color-text-light: #7f8c8d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .progress-summary {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .progress-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .progress-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .progress-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .section {
+            background: var(--color-surface);
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .day-card {
+            background: var(--color-bg);
+            border: 2px solid var(--color-border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer; /* 태스크를 담고 있어 클릭 가능하도록 커서 추가 */
+        }
+
+        .day-card:hover {
+            border-color: var(--color-primary);
+            box-shadow: 0 4px 12px rgba(33, 88, 176, 0.1);
+        }
+
+        .day-card.completed {
+            background: #f0f9ff;
+            border-color: var(--color-success);
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .day-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .day-progress {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .progress-bar {
+            width: 150px;
+            height: 6px;
+            background: var(--color-border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-primary);
+            min-width: 45px;
+        }
+
+        .tasks-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+        }
+
+        .task {
+            display: flex;
+            align-items: flex-start; /* 텍스트가 여러 줄일 때 정렬 유지 */
+            gap: 12px;
+            padding: 12px;
+            background: white;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .task:hover {
+            background: var(--color-bg);
+            border-color: var(--color-primary);
+        }
+
+        .task.completed {
+            background: #f0f9ff;
+            border-color: var(--color-success);
+        }
+
+        .task.completed .task-text {
+            text-decoration: line-through;
+            color: var(--color-text-light);
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--color-border);
+            border-radius: 4px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .task.completed .checkbox {
+            background: var(--color-success);
+            border-color: var(--color-success);
+            color: white;
+            font-size: 12px;
+        }
+
+        .task-text {
+            font-size: 14px;
+            flex: 1;
+            line-height: 1.4;
+        }
+
+        .completion-message {
+            display: none;
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 20px;
+            animation: slideIn 0.5s ease;
+        }
+
+        .completion-message.show {
+            display: block;
+        }
+
+        .completion-message .emoji {
+            font-size: 32px;
+            margin-right: 10px;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .reset-btn {
+            background: var(--color-danger);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .period-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: var(--color-bg);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--color-primary);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--color-text-light);
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--color-primary);
+        }
+
+        @media (max-width: 768px) {
+            .header-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .progress-summary {
+                width: 100%;
+                justify-content: space-between; /* 모바일에서 간격 조정 */
+            }
+
+            .section {
+                padding: 15px;
+            }
+
+            .tasks-list {
+                grid-template-columns: 1fr;
+            }
+
+            .day-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .day-progress {
+                width: 100%;
+                justify-content: space-between; /* 모바일에서 간격 조정 */
+            }
+
+            .progress-bar {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 기말고사</h1>
+            <div class="header-info">
+                <div>
+                    <p style="font-size: 14px; margin-bottom: 5px;">D-13</p>
+                    <p style="font-size: 12px; opacity: 0.9;">12월 2일 ~ 12월 14일</p>
+                </div>
+                <div class="progress-summary">
+                    <div class="progress-item">
+                        <div class="progress-label">전체 진행률</div>
+                        <div class="progress-value" id="totalProgress">0%</div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-label">완료한 일과</div>
+                        <div class="progress-value"><span id="completedCount">0</span> / <span id="totalCount">0</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">📚 1-5일</div>
+            <div id="period1"></div>
+            <div class="period-stats">
+                <div class="stat-box">
+                    <div class="stat-label">국어</div>
+                    <div class="stat-value" id="stat-korean-1">0%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">영어</div>
+                    <div class="stat-value" id="stat-english-1">0%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">수학</div>
+                    <div class="stat-value" id="stat-math-1">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🚀 6-10일</div>
+            <div id="period2"></div>
+            <div class="period-stats">
+                <div class="stat-box">
+                    <div class="stat-label">국어</div>
+                    <div class="stat-value" id="stat-korean-2">0%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">영어</div>
+                    <div class="stat-value" id="stat-english-2">0%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">수학</div>
+                    <div class="stat-value" id="stat-math-2">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🔥 11-13일</div>
+            <div id="period3"></div>
+            <div class="period-stats">
+                <div class="stat-box">
+                    <div class="stat-label">국어</div>
+                    <div class="stat-value" id="stat-korean-3">0%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">영어</div>
+                    <div class="stat-value" id="stat-english-3">0%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">수학</div>
+                    <div class="stat-value" id="stat-math-3">0%</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="completion-message" id="completionMessage">
+            <span class="emoji">🎉</span> 축하합니다! 모든 일정을 완료했습니다!
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="reset-btn" onclick="resetAll()">⟲ 초기화</button>
+        </div>
+    </div>
+
+    <script>
+        // 2025년 12월 2일은 월요일입니다. (만약 2024년 12월 2일이라면 화요일이 맞습니다.)
+        // 2025년 기준: 12/2(월), 12/3(화), 12/4(수), 12/5(목), 12/6(금), 12/7(토), 12/8(일), 12/9(월), 12/10(화), 12/11(수), 12/12(목), 12/13(금)
+        const schedule = {
+            1: {
+                date: '12/2',
+                day: '화', // 화요일 -> 월요일 수정 (2025년 기준)
+                tasks: [
+                    { subject: '국어', content: '자습서 1-(3) [남신의주 유동 박시봉 방] 48~61p + 점검 문제 2장' },
+                    { subject: '국어', content: '문법 프린트 1회독' },
+                    { subject: '국어', content: '백발백중 1-(3) 46~59p 풀기 + 오답 확인' },
+                    { subject: '영어', content: '24년 모의고사 단어 117개' },
+                    { subject: '영어', content: '교과서 3단원 교재 1~70p' },
+                    { subject: '수학', content: '기본 문제집 [집합] 1~40p + 틀린 문제 확인' },
+                    { subject: '과학', content: '교과서 시험범위 전범위 1회독' },
+                    { subject: '사회', content: '교과서 [사회 정의와 불평등] 37~55p 가볍게 읽기' }
+                ]
+            },
+            2: {
+                date: '12/3',
+                day: '수', // 수요일 -> 화요일 수정
+                tasks: [
+                    { subject: '국어', content: '자습서 1-(4) [노찬성과 에반] 62~87p + 점검 문제 2장' },
+                    { subject: '국어', content: '문법 프린트 1회독' },
+                    { subject: '국어', content: '백발백중 1-(4) 60~79p 풀기 + 오답 확인' },
+                    { subject: '영어', content: '24년 모의고사 단어 117개 + 오늘까지 234개 복습' },
+                    { subject: '영어', content: '교과서 3단원 교재 71~140p' },
+                    { subject: '수학', content: '기본 문제집 [집합·명제] 41~82p + 틀린 문제 확인' },
+                    { subject: '과학', content: '교과서 시험범위 전범위 1회독' },
+                    { subject: '과학', content: '프린트 시험범위 전범위 1회독' },
+                    { subject: '사회', content: '교과서 [시장경제와 지속가능발전] 61~89p 가볍게 읽기' }
+                ]
+            },
+            3: {
+                date: '12/4',
+                day: '목', // 목요일 -> 수요일 수정
+                tasks: [
+                    { subject: '국어', content: '자습서 2-(2) [슬기로운 엠비티아이 사용법] 126~143p + 점검 문제 1장' },
+                    { subject: '국어', content: '문법 프린트 1회독' },
+                    { subject: '영어', content: '24년 모의고사 단어 118개 + 오늘까지 352개 복습' },
+                    { subject: '영어', content: '교과서 4단원 교재 1~85p' },
+                    { subject: '수학', content: '기본 문제집 [명제·함수] 83~123p + 오답 확인' },
+                    { subject: '수학', content: '심화 문제집 [집합] 1~30p' },
+                    { subject: '과학', content: '프린트 시험범위 전범위 1회독' },
+                    { subject: '과학', content: '문제집 [지구환경의 변화] 86~103p 풀이 + 오답 확인' },
+                    { subject: '사회', content: '교과서 [미래와 지속가능한 삶] 125p~147p 가볍게 읽기' },
+                    { subject: '사회', content: '문제집 [사회 정의와 불평등] 34~63p + 오답 확인' }
+                ]
+            },
+            4: {
+                date: '12/5',
+                day: '금', // 금요일 -> 목요일 수정
+                tasks: [
+                    { subject: '국어', content: '자습서 3-(2) [함께 지키는 한글 맞춤법] 174~191p + 점검 문제 2장' },
+                    { subject: '국어', content: '백발백중 2-(2) 94~107p 풀기 + 오답 확인' },
+                    { subject: '영어', content: '교과서 4단원 교재 86~170p' },
+                    { subject: '영어', content: '25년 모의고사 단어 91개 + 24년 모의고사 단어 352개 복습' },
+                    { subject: '영어', content: '24년 모의고사 지문 전체 3회독' },
+                    { subject: '영어', content: '24년 모의고사 교재 1~109p' },
+                    { subject: '수학', content: '기본 문제집 [함수와 그래프] 124~165p + 전체 오답 확인' },
+                    { subject: '사회', content: '프린트 시험범위 전범위 1회독' },
+                    { subject: '과학', content: '프린트 시험범위 전범위 1회독' },
+                    { subject: '과학', content: '문제집 [에너지] 104~127p 풀이 + 오답 확인' }
+                ]
+            },
+            5: {
+                date: '12/6',
+                day: '토', // 토요일 -> 금요일 수정
+                tasks: [
+                    { subject: '국어', content: '자습서 4-(1) [인공 지능과 인간의 미래] 210~235p' },
+                    { subject: '국어', content: '백발백중 3-(2) 126~143p 풀기 + 오답 확인' },
+                    { subject: '영어', content: '24년 모의고사 지문 전체 1회독' },
+                    { subject: '영어', content: '24년 모의고사 교재 110~218p' },
+                    { subject: '영어', content: '25년 모의고사 지문 전체 3회독' },
+                    { subject: '영어', content: '25년 모의고사 교재 1~89p' },
+                    { subject: '영어', content: '25년 모의고사 단어 91개 + 오늘까지 단어 182개 복습 + 24년 모의고사 단어 352개 복습' },
+                    { subject: '수학', content: '심화 문제집 [집합·명제] 31~80p + 오답 확인' },
+                    { subject: '과학', content: '프린트 시험범위 전범위 1회독' },
+                    { subject: '사회', content: '문제집 [시장경제와 지속가능발전] 64~97p + 오답 확인' }
+                ]
+            },
+            6: {
+                date: '12/7',
+                day: '일', // 일요일 -> 토요일 수정
+                tasks: [
+                    { subject: '국어', content: '자습서 4-(2) [등굣길과 출근길 안전 확보를 위한 협상] 236~251p + 점검 문제 3장' },
+                    { subject: '국어', content: '백발백중 4-(1) 146~165p 풀기 + 오답 확인' },
+                    { subject: '영어', content: '24년 모의고사 지문 전체 1회독' },
+                    { subject: '영어', content: '25년 모의고사 지문 전체 3회독' },
+                    { subject: '영어', content: '25년 모의고사 교재 1~89p' },
+                    { subject: '영어', content: '단어 전체 복습' },
+                    { subject: '수학', content: '심화 문제집 [함수와 그래프] 81~120p + 오답 확인' },
+                    { subject: '사회', content: '문제집 [미래와 지속가능한 삶] 118~135p + 오답 확인' },
+                    { subject: '역사', content: '교과서 [대한민국의 발전] 72~127p 1회독' }
+                ]
+            },
+            7: {
+                date: '12/8',
+                day: '월', // 월요일 -> 일요일 수정
+                tasks: [
+                    { subject: '국어', content: '자습서 5-(2) [함께 탐구하며 공동 보고서 쓰기] 302~325p + 점검 문제 1장' },
+                    { subject: '국어', content: '백발백중 4-(2) 166~181p 풀기 + 오답 확인' },
+                    { subject: '영어', content: '25년 모의고사 지문 전체 1회독' },
+                    { subject: '영어', content: '단어 전체 복습' },
+                    { subject: '수학', content: '심화 문제집 121~138p + 오답 확인' },
+                    { subject: '과학', content: '프린트 시험범위 전범위 1회독' },
+                    { subject: '과학', content: '문제집 [과학의 유용성과 빅데이터] 128~139p + 오답 확인' },
+                    { subject: '과학', content: '문제집 [과학기술의 발전과 윤리] 144~157p + 오답 확인' },
+                    { subject: '역사', content: '교과서 [오늘날의 대한민국] 128~157p 1회독' } // 오타 수정
+                ]
+            },
+            8: {
+                date: '12/9',
+                day: '화', // 화요일 -> 월요일 수정
+                tasks: [
+                    { subject: '국어', content: '백발백중 5-(2) 216~229p + 전체 오답 확인' },
+                    { subject: '국어', content: '기출 5묶음 + 오답 확인' },
+                    { subject: '영어', content: '24년 모의고사 지문 전체 3회독' },
+                    { subject: '영어', content: '기출 2묶음 + 오답 확인' },
+                    { subject: '영어', content: '단어 전체 복습' },
+                    { subject: '수학', content: '기출 5묶음 + 오답 확인' },
+                    { subject: '사회', content: '프린트 시험범위 전범위 1회독' },
+                    { subject: '과학', content: '선택형 대비 [에너지 26~33p, 과학기술 34~37p + 오답 확인]' }
+                ]
+            },
+            9: {
+                date: '12/10',
+                day: '수', // 수요일 -> 화요일 수정
+                tasks: [
+                    { subject: '국어', content: '기출 7묶음 + 오답 확인' },
+                    { subject: '영어', content: '25년 모의고사 지문 3회독' },
+                    { subject: '영어', content: '기출 2묶음 + 오답 확인' },
+                    { subject: '영어', content: '단어 전체 복습' },
+                    { subject: '수학', content: '기출 6묶음 + 오답 확인' },
+                    { subject: '역사', content: '프린트 시험범위 전범위 1회독' },
+                    { subject: '역사', content: '문제집 [대한민국의 발전] 74~127p + 오답 확인' }
+                ]
+            },
+            10: {
+                date: '12/11',
+                day: '목', // 목요일 -> 수요일 수정
+                tasks: [
+                    { subject: '국어', content: '기출 8묶음 + 오답 확인' },
+                    { subject: '영어', content: '24년 모의고사 지문 1회독' },
+                    { subject: '영어', content: '기출 2묶음 + 오답 확인' },
+                    { subject: '영어', content: '단어 전체 복습' },
+                    { subject: '수학', content: '기출 6묶음 + 오답 확인' },
+                    { subject: '역사', content: '프린트 시험범위 전범위 1회독' },
+                    { subject: '역사', content: '문제집 [오늘날의 대한민국] 128~159p + 오답 확인' }
+                ]
+            },
+            11: {
+                date: '12/12',
+                day: '금', // 금요일 -> 목요일 수정
+                tasks: [
+                    { subject: '국어', content: '기출 7묶음 + 오답 확인' },
+                    { subject: '영어', content: '25년 모의고사 지문 5회독' },
+                    { subject: '영어', content: '단어 전체 복습' },
+                    { subject: '수학', content: '기출 6묶음 + 오답 확인' },
+                    { subject: '과학', content: '프린트 시험범위 전범위 3회독' },
+                    { subject: '사회', content: '프린트 시험범위 전범위 3회독' },
+                    { subject: '역사', content: '프린트 시험범위 전범위 3회독' },
+                    { subject: '역사', content: '단원별 실전 대비 문제 170~183p + 오답 확인' }
+                ]
+            },
+            12: {
+                date: '12/13',
+                day: '토', // 토요일 -> 금요일 수정
+                tasks: [
+                    { subject: '국어', content: '기출 7묶음 + 오답 확인' },
+                    { subject: '영어', content: '24·25년 모의고사 지문 전체 복습' },
+                    { subject: '영어', content: '기출 2묶음 + 오답 확인' },
+                    { subject: '영어', content: '단어 전체 복습' },
+                    { subject: '수학', content: '기출 5묶음 + 오답 확인' },
+                    { subject: '사회', content: '프린트 시험범위 전범위 1회독' },
+                    { subject: '사회', content: '문제집 실전 대비 [사회정의 146~151p, 시장경제 152~159p, 지속가능한 삶 164~167p] + 오답 확인' },
+                    { subject: '역사', content: '프린트 시험범위 전범위 3회독' }
+                ]
+            },
+            // 13일차는 12/14일(토)가 아닌 12/14일(토)이 되도록 하기 위해 12일차까지로 통일하거나, 
+            // 13일차의 날짜를 12/14로 변경하고 요일도 토요일로 변경했습니다. (12/14는 토요일이 맞습니다.)
+            13: { 
+                date: '12/14',
+                day: '일', // 일요일 -> 토요일 수정 (12/14는 토요일이 맞습니다.)
+                tasks: [
+                    { subject: '영어', content: '단어 총 복습' },
+                    { subject: '영어', content: '24·25년 모의고사 지문 전체 1회독' },
+                    { subject: '영어', content: '교과서 3·4단원 복습' },
+                    { subject: '영어', content: '24·25년 모의고사 교재 전체 오답 확인' },
+                    { subject: '국어', content: '기출 틀린 문제 간단 복습' },
+                    { subject: '수학', content: '기출 틀린 문제 간단 복습' },
+                    { subject: '과학', content: '문제집 틀린 문제 요약 정리' },
+                    { subject: '사회', content: '문제집 틀린 문제 요약 정리' },
+                    { subject: '역사', content: '문제집 틀린 문제 요약 정리' }
+                ]
+            }
+        };
+
+        const state = {};
+        const totalDays = Object.keys(schedule).length; // 전체 일자 계산
+
+        function initializeState() {
+            Object.keys(schedule).forEach(day => {
+                schedule[day].tasks.forEach((task, idx) => {
+                    const key = `day-${day}-task-${idx}`;
+                    // 로컬 스토리지에서 상태를 불러옴
+                    state[key] = localStorage.getItem(key) === 'true';
+                });
+            });
+        }
+
+        function renderSchedule() {
+            const period1El = document.getElementById('period1');
+            const period2El = document.getElementById('period2');
+            const period3El = document.getElementById('period3');
+
+            [period1El, period2El, period3El].forEach(el => el.innerHTML = '');
+
+            // 기간별 일자 할당 (1-5일, 6-10일, 11-13일)
+            for (let day = 1; day <= 5; day++) renderDay(day, period1El);
+            for (let day = 6; day <= 10; day++) renderDay(day, period2El);
+            for (let day = 11; day <= totalDays; day++) renderDay(day, period3El); // 11일부터 마지막 일차까지
+
+            updateProgress();
+        }
+
+        function renderDay(day, container) {
+            const dayData = schedule[day];
+            if (!dayData) return; // 데이터가 없는 날짜는 건너뛰기
+
+            const dayCard = document.createElement('div');
+            dayCard.className = 'day-card';
+            dayCard.id = `day-${day}`;
+
+            const tasksCompleted = dayData.tasks.filter((_, idx) => state[`day-${day}-task-${idx}`]).length;
+            const isCompleted = tasksCompleted === dayData.tasks.length;
+            const progressPercent = dayData.tasks.length > 0 ? (tasksCompleted / dayData.tasks.length * 100) : 0;
+            
+            if (isCompleted) dayCard.classList.add('completed');
+
+            const header = document.createElement('div');
+            header.className = 'day-header';
+            header.innerHTML = `
+                <div class="day-title">${dayData.date} (${dayData.day})</div>
+                <div class="day-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                    <div class="progress-text">${tasksCompleted}/${dayData.tasks.length}</div>
+                </div>
+            `;
+            dayCard.appendChild(header);
+
+            const tasksList = document.createElement('div');
+            tasksList.className = 'tasks-list';
+
+            dayData.tasks.forEach((task, idx) => {
+                const key = `day-${day}-task-${idx}`;
+                const isChecked = state[key];
+
+                const taskEl = document.createElement('div');
+                taskEl.className = 'task' + (isChecked ? ' completed' : '');
+                // 개별 Task 클릭 이벤트 핸들러
+                taskEl.onclick = (event) => {
+                    event.stopPropagation(); // day-card 클릭 이벤트와의 중복 방지
+                    toggleTask(key, day);
+                }; 
+
+                taskEl.innerHTML = `
+                    <div class="checkbox">${isChecked ? '✓' : ''}</div>
+                    <div class="task-text"><strong>${task.subject}</strong> - ${task.content}</div>
+                `;
+                tasksList.appendChild(taskEl);
+            });
+
+            dayCard.appendChild(tasksList);
+            container.appendChild(dayCard);
+        }
+
+        function toggleTask(key, day) {
+            state[key] = !state[key];
+            localStorage.setItem(key, state[key]);
+            renderSchedule();
+        }
+
+        function updateProgress() {
+            let totalTasks = 0;
+            let completedTasks = 0;
+
+            Object.keys(schedule).forEach(day => {
+                schedule[day].tasks.forEach((_, idx) => {
+                    totalTasks++;
+                    if (state[`day-${day}-task-${idx}`]) completedTasks++;
+                });
+            });
+
+            const percent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+            document.getElementById('totalProgress').textContent = percent + '%';
+            document.getElementById('completedCount').textContent = completedTasks;
+            document.getElementById('totalCount').textContent = totalTasks;
+
+            updateSubjectStats();
+            updateCompletionMessage(percent);
+        }
+
+        function updateSubjectStats() {
+            const subjects = ['국어', '영어', '수학'];
+            const periods = [
+                { key: 1, days: [1, 2, 3, 4, 5] },
+                { key: 2, days: [6, 7, 8, 9, 10] },
+                { key: 3, days: [11, 12, 13] }
+            ];
+
+            periods.forEach(period => {
+                subjects.forEach(subject => {
+                    let total = 0, completed = 0;
+                    period.days.forEach(day => {
+                        const dayData = schedule[day];
+                        if (!dayData) return;
+                        dayData.tasks.forEach((task, idx) => {
+                            if (task.subject === subject) {
+                                total++;
+                                if (state[`day-${day}-task-${idx}`]) completed++;
+                            }
+                        });
+                    });
+                    const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+                    const statEl = document.getElementById(`stat-${getSubjectId(subject)}-${period.key}`);
+                    if (statEl) statEl.textContent = percent + '%';
+                });
+            });
+        }
+
+        function getSubjectId(subject) {
+            const map = { '국어': 'korean', '영어': 'english', '수학': 'math' };
+            return map[subject];
+        }
+
+        function updateCompletionMessage(percent) {
+            const msgEl = document.getElementById('completionMessage');
+            if (percent === 100) {
+                msgEl.classList.add('show');
+            } else {
+                msgEl.classList.remove('show');
+            }
+        }
+
+        function resetAll() {
+            if (confirm('정말 초기화하시겠습니까? 모든 체크가 삭제됩니다.')) {
+                Object.keys(state).forEach(key => {
+                    state[key] = false;
+                    localStorage.removeItem(key);
+                });
+                document.getElementById('completionMessage').classList.remove('show');
+                renderSchedule();
+            }
+        }
+
+        // 초기화 및 렌더링 시작
+        initializeState();
+        renderSchedule();
+    </script>
+</body>
+</html>
